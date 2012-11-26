@@ -7,9 +7,9 @@
 
 namespace eelish {
 
-/// A mostly-lockless fixed-size Vector
+/// A mostly lock-free fixed-size Vector
 ///
-///        This is the first time I've done any non-trivial lockless
+///        This is the first time I've done any non-trivial lock-free
 ///        programming.  If you think you've spotted a bug, please let
 ///        me know. :)
 ///
