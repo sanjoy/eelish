@@ -9,6 +9,9 @@ namespace eelish {
 
 /// A mostly-lockless fixed-size Vector
 ///
+///        This is the first time I've done any non-trivial lockless
+///        programming.  If you think you've spotted a bug, please let
+///        me know. :)
 ///
 /// The consistency guarantee provided by FixedVector is this:
 ///
@@ -66,7 +69,7 @@ namespace eelish {
 ///   b. `A` issues a push_back and crashes after changing the length
 ///      but before writing to buffer.  The hashtable in inconsistent
 ///      now; till that inconsistent (unwritten) value is popped off.
-
+///
 /// A vector of size `Size` and holding elements of type `T *`.  The
 /// implementation steal the last two bits of the pointers, so keep
 /// this in mind when doing naughty things.  Moreover, the range for
