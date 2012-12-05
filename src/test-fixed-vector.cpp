@@ -4,8 +4,7 @@
 #include <algorithm>
 #include <cstdlib>
 
-// TODO: Abstract out pthread calls to a platform specific module
-#include "pthread.h"
+#include "platform.hpp"
 
 using namespace eelish;
 using namespace std;
@@ -179,22 +178,19 @@ class PushPopGetTest : public FixedVectorTest {
   }
 
   void update_global_histogram(int *local_hist) {
-    pthread_mutex_lock(&histogram_mutex);
+    MutexLocker lock(&histogram_mutex_);
     for (int i = 0; i < kLimit; i++) {
-      histogram[i] += local_hist[i];
+      histogram_[i] += local_hist[i];
     }
-    pthread_mutex_unlock(&histogram_mutex);
   }
 
   virtual void synch_init() {
     FixedVectorTest::synch_init();
-    fill(histogram, histogram + kLimit, 0);
-    pthread_mutex_init(&histogram_mutex, NULL);
+    fill(histogram_, histogram_ + kLimit, 0);
   }
 
   virtual void synch_destroy() {
     FixedVectorTest::synch_destroy();
-    pthread_mutex_destroy(&histogram_mutex);
   }
 
   virtual bool synch_verify() {
@@ -206,18 +202,18 @@ class PushPopGetTest : public FixedVectorTest {
       int value = to_integer(vector_->get(i));
       check_i(value, <, kLimit, return false);
       check_i(value, >=, 0, return false);
-      histogram[value]++;
+      histogram_[value]++;
     }
 
     for (int i = 0; i < kLimit; i++) {
-      check_i(histogram[i], ==, 2 * get_thread_count(), return false);
+      check_i(histogram_[i], ==, 2 * get_thread_count(), return false);
     }
     return true;
   }
 
   static const int kLimit = 32;
-  int histogram[kLimit];
-  pthread_mutex_t histogram_mutex;
+  int histogram_[kLimit];
+  Mutex histogram_mutex_;
 };
 
 bool run_with_thread_count(bool quiet, int thread_count) {

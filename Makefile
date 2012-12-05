@@ -6,8 +6,12 @@ LD=g++
 LDFLAGS=-lpthread
 BUILD_DIR=build
 
-common-headers=$(addprefix src/, atomics.hpp \
-	atomics-gcc-inl.hpp atomics-gcc-x86-inl.hpp tests.hpp)
+common-headers=$(addprefix src/, atomics.hpp			\
+                                 atomics-gcc-inl.hpp		\
+                                 atomics-gcc-x86-inl.hpp	\
+                                 platform.hpp			\
+                                 platform-posix.hpp		\
+                                 tests.hpp)
 fixed-vector-headers=$(addprefix src/, fixed-vector.hpp fixed-vector-inl.hpp)
 common-objects=$(addprefix ${BUILD_DIR}/, tests.o tests-pthread.o)
 
