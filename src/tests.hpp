@@ -28,6 +28,7 @@ class ThreadedTest {
   /// Printf style output function.  Prints things only if the tests
   /// isn't quiet.
   void output(const char *format, ...);
+  void always_output(const char *format, ...);
 
   virtual ~ThreadedTest() { destroy_platform(); }
 
@@ -48,7 +49,8 @@ class ThreadedTest {
 /// `lhs` and `rhs` must be pure.
 #define check_i(lhs, op, rhs, fail_action) do {                         \
     if (!((lhs) op (rhs))) {                                            \
-      output("(%s: %d): expected " #lhs " " #op " " #rhs " but "        \
+	 eelish::ThreadedTest::output("(%s: %d): expected " #lhs " "	\
+				    #op " " #rhs " but "		\
              #lhs " = %d, " #rhs " = %d\n", __FILE__, __LINE__, lhs,    \
              rhs);                                                      \
       fail_action;                                                      \

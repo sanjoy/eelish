@@ -65,7 +65,7 @@ bool ThreadedTest::execute(bool quiet, int thread_count) {
   if (successful) {
     output("%s passed!\n", test_name_.c_str());
   } else {
-    output("%s failed!\n", test_name_.c_str());
+    always_output("%s failed!\n", test_name_.c_str());
   }
 
   return successful;
