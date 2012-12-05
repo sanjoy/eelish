@@ -61,4 +61,8 @@ T *cas_previous_value(volatile T **location, T *old_value, T *new_value) {
 
 }
 
+#if defined(__i386__) || defined(__x86_64__)
 #include "atomics-gcc-x86-inl.hpp"
+#else
+#error "eelish only understands x86 CPUs!"
+#endif

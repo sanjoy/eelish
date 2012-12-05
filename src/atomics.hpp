@@ -96,6 +96,10 @@ inline bool Atomic<T>::cas_unprime() {
 
 }
 
+#ifdef __GNUC__
 #include "atomics-gcc-inl.hpp"
+#else
+#error "eelish only understands gcc atomics"
+#endif
 
 #endif
