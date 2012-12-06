@@ -28,13 +28,13 @@ class Atomic {
   /// A "primed" word is a word with its least significant bit set.
   /// Whether such an operation is meaningful or not is determined by
   /// the context in which it is used.
-  inline bool is_primed() const;
-
+  ///
   /// cas_prime and cas_unprime atomically prime and unprime a word
   /// and return true if successful.  Note that cas_prime will fail if
   /// the word is already primed and cas_unprime will fail if the word
-  /// isn't primed.
-  inline bool cas_prime();
+  /// isn't primed.  cas_prime also returns the unprimed value of the
+  /// word via `out_previous_value`.
+  inline bool cas_prime(T *out_previous_value);
   inline bool cas_unprime();
 
   /// Convenience functions which return an unprimed value of type T.
@@ -74,21 +74,26 @@ void Atomic<T>::raw_store(T value) {
 }
 
 template<typename T>
-inline bool Atomic<T>::is_primed() const {
-  return reinterpret_cast<Word>(nobarrier_load()) & kPrimeBit;
-}
+bool Atomic<T>::cas_prime(T *out_value) {
+  Word old_value = reinterpret_cast<Word>(nobarrier_load());
+  if (old_value & kPrimeBit) return false;
 
-template<typename T>
-inline bool Atomic<T>::cas_prime() {
-  Word old_value = reinterpret_cast<Word>(nobarrier_load()) & (~kPrimeBit);
   Word new_value = old_value | kPrimeBit;
-  return boolean_cas(reinterpret_cast<T>(old_value),
-                     reinterpret_cast<T>(new_value));
+  if (boolean_cas(reinterpret_cast<T>(old_value),
+                  reinterpret_cast<T>(new_value))) {
+    *out_value = reinterpret_cast<T>(old_value);
+    return true;
+  } else {
+    return false;
+  }
 }
 
 template<typename T>
-inline bool Atomic<T>::cas_unprime() {
-  Word old_value = reinterpret_cast<Word>(nobarrier_load()) | kPrimeBit;
+bool Atomic<T>::cas_unprime() {
+  Word old_value_raw = reinterpret_cast<Word>(nobarrier_load());
+  if (!(old_value_raw & kPrimeBit)) return false;
+
+  Word old_value = old_value_raw | kPrimeBit;
   Word new_value = old_value & (~kPrimeBit);
   return boolean_cas(reinterpret_cast<T>(old_value),
                      reinterpret_cast<T>(new_value));

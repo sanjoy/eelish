@@ -52,12 +52,12 @@ T *FixedVector<T, Size>::pop_back(std::size_t *out_index) {
     if (length == 0) return reinterpret_cast<T *>(kOutOfRange);
 
     Word index = length - 1;
+    T *value;
 
     // pop_back "primes" the value it is about to pop by setting a
     // bit.  It is illegal to pop "past" a primed element.
-    if (!buffer_[index].cas_prime()) continue;
+    if (!buffer_[index].cas_prime(&value)) continue;
 
-    T *value = buffer_[index].nobarrier_load_unprimed();
     // We can't let this load be reordered to after the modifying the
     // length -- we might end up reading a completely different value.
     memory_fence();

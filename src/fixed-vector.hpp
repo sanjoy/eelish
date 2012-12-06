@@ -87,7 +87,7 @@ class FixedVector {
   /// is returned in `out_index`.  `pop_back` on an empty vector
   /// returns kOutOfRange, which can be tested using
   /// `is_out_of_range`.
-  T *pop_back(std::size_t *out_index);
+  T * __attribute__((flatten)) pop_back(std::size_t *out_index);
 
   /// Fetches a value from the vector.  Returns kOutOfRange for an
   /// invalid index (check using is_out_of_range).
