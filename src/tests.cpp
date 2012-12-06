@@ -34,6 +34,7 @@ void CommandLine::Parse(map<string, CommandLine::Arg> *meta,
     if (arg_name == NULL) {
       arg_name = argv[i] + 2;
     } else {
+      arg_name = argv[i] + 5;
       was_negation = true;
     }
 
