@@ -210,6 +210,7 @@ class PushPopGetTest : public FixedVectorTest<Vec> {
  protected:
   virtual bool threaded_test() {
     bool choice = rand() % 2 == 0;
+    bool to_pop = rand() % 10 == 0;
 
     // I don't want to lock on histogram_mutex since locking in the
     // middle of the test might hide subtle bugs.
@@ -217,26 +218,28 @@ class PushPopGetTest : public FixedVectorTest<Vec> {
     fill(local_histogram, local_histogram + kLimit, 0);
 
     if (choice) {
-      bool result = check_mutate(local_histogram) && check_get();
+      bool result = check_mutate(local_histogram, to_pop) && check_get();
       update_global_histogram(local_histogram);
       return result;
     } else {
-      bool result = check_get() && check_mutate(local_histogram);
+      bool result = check_get() && check_mutate(local_histogram, to_pop);
       update_global_histogram(local_histogram);
       return result;
     }
   }
 
-  bool check_mutate(int *histogram) {
+  bool check_mutate(int *histogram, bool to_pop) {
     assert(kLimit <
            ((2 * kVectorSize) / ThreadedTest::get_thread_count()));
     for (int i = 0; i < kLimit; i++) {
       FixedVectorTest<Vec>::vector_->push_back(to_pointer(i));
       FixedVectorTest<Vec>::vector_->push_back(to_pointer(i));
-      int value = FixedVectorTest<Vec>::definite_pop();
-      histogram[value]++;
-      check_i(value, <, kLimit, return false);
-      check_i(value, >=, 0, return false);
+      if (to_pop) {
+        int value = FixedVectorTest<Vec>::definite_pop();
+        histogram[value]++;
+        check_i(value, <, kLimit, return false);
+        check_i(value, >=, 0, return false);
+      }
     }
     return true;
   }
@@ -274,13 +277,9 @@ class PushPopGetTest : public FixedVectorTest<Vec> {
 
   virtual bool synch_verify() {
     int thread_count = ThreadedTest::get_thread_count();
-    size_t expected_length = thread_count * kLimit;
-    check_i(FixedVectorTest<Vec>::vector_->length(), ==, expected_length,
-            return false);
+    size_t length = FixedVectorTest<Vec>::vector_->length();
 
-    for (size_t i = 0; i < expected_length; i++) {
-      check_i(expected_length, ==, FixedVectorTest<Vec>::vector_->length(),
-              return false);
+    for (size_t i = 0; i < length; i++) {
       int value = to_integer(FixedVectorTest<Vec>::vector_->get(i));
       check_i(value, <, kLimit, return false);
       check_i(value, >=, 0, return false);
