@@ -1,7 +1,10 @@
 #ifndef __EELISH_TESTS__HPP
 #define __EELISH_TESTS__HPP
 
+#include <map>
 #include <string>
+
+#include "platform.hpp"
 
 namespace eelish {
 
@@ -56,5 +59,45 @@ class ThreadedTest {
       fail_action;                                                      \
     }                                                                   \
   } while(0)
+
+
+class CommandLine {
+ public:
+  enum ArgType {
+    BOOL = 1,
+    INTEGER,
+    STRING,
+  };
+
+  struct Arg {
+    ArgType type;
+    union {
+      bool boolean;
+      long integer;
+      const char *string;
+    };
+  };
+
+  static void Parse(std::map<std::string, Arg> *meta,
+                    int argc, char **argv);
+};
+
+class Timer {
+ public:
+  explicit inline Timer(long *out_time) :
+    out_time_(out_time),
+    begin_time_(eelish::Platform::CurrentTimeInUSec()) { }
+
+  inline ~Timer() {
+    long end_time = eelish::Platform::CurrentTimeInUSec();
+    if (out_time_ != NULL) {
+      *out_time_ = end_time - begin_time_;
+    }
+  }
+
+ private:
+  long *out_time_;
+  long begin_time_;
+};
 
 #endif

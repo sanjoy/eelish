@@ -3,6 +3,8 @@
 
 #include <algorithm>
 #include <cstdlib>
+#include <iostream>
+#include <map>
 
 #include "platform.hpp"
 
@@ -296,24 +298,101 @@ class PushPopGetTest : public FixedVectorTest<Vec> {
   Mutex histogram_mutex_;
 };
 
+struct TestConfig {
+  int thread_count_lower;
+  int thread_count_upper;
+  bool quiet;
+  bool push_only;
+  bool push_pop;
+  bool push_pop_get;
+  string test_type;
+
+  void read_config(int argc, char **argv) {
+    map<string, CommandLine::Arg> arg_info;
+    arg_info["quiet"].type = CommandLine::BOOL;
+    arg_info["quiet"].boolean = false;
+
+    arg_info["push-only"].type = CommandLine::BOOL;
+    arg_info["push-only"].boolean = true;
+
+    arg_info["push-pop"].type = CommandLine::BOOL;
+    arg_info["push-pop"].boolean = true;
+
+    arg_info["push-pop-get"].type = CommandLine::BOOL;
+    arg_info["push-pop-get"].boolean = true;
+
+    arg_info["thread-count-lower"].type = CommandLine::INTEGER;
+    arg_info["thread-count-lower"].integer = 1;
+
+    arg_info["thread-count-upper"].type = CommandLine::INTEGER;
+    arg_info["thread-count-upper"].integer = 128;
+
+    arg_info["test-type"].type = CommandLine::STRING;
+    arg_info["test-type"].string = "real";
+
+    CommandLine::Parse(&arg_info, argc, argv);
+
+    quiet = arg_info["quiet"].boolean;
+    push_only = arg_info["push-only"].boolean;
+    push_pop = arg_info["push-pop"].boolean;
+    push_pop_get = arg_info["push-pop-get"].boolean;
+
+    thread_count_lower = arg_info["thread-count-lower"].integer;
+    thread_count_upper = arg_info["thread-count-upper"].integer;
+    test_type = arg_info["test-type"].string;
+  }
+};
+
 template<template<typename T, size_t Size> class Vec>
-bool run_with_thread_count(bool quiet, int thread_count) {
-  PushOnlyTest<Vec> push_only;
-  PushPopTest<Vec> push_pop;
-  PushPopGetTest<Vec> push_pop_get;
+bool run_with_thread_count(TestConfig *config, int thread_count) {
+  bool quiet = config->quiet;
+  bool result = true;
 
-  return push_only.execute(quiet, thread_count) &&
-      push_pop.execute(quiet, thread_count) &&
-      push_pop_get.execute(quiet, thread_count);
+  if (config->push_only) {
+    result &= PushOnlyTest<Vec>().execute(quiet, thread_count);
+  }
+  if (config->push_pop) {
+    result &= PushPopTest<Vec>().execute(quiet, thread_count);
+  }
+  if (config->push_pop_get) {
+    PushPopGetTest<Vec>().execute(quiet, thread_count);
+  }
+
+  return result;
 }
 
+
+template<template<typename T, size_t Size> class Vec>
+bool run_tests_on_container(TestConfig *config) {
+  for (int i = config->thread_count_lower;
+       i <= config->thread_count_upper;
+       i++) {
+    if (!run_with_thread_count<Vec>(config, i)) return false;
+  }
+  return true;
 }
 
-int main() {
-  for (int i = 1; i < 128; i++) {
-    if (!run_with_thread_count<FixedVector>(false, i)) {
-      return 1;
+
+}
+
+int main(int argc, char **argv) {
+  TestConfig config;
+  config.read_config(argc, argv);
+  bool success = true;
+  long time_taken;
+
+  {
+    Timer timer(&time_taken);
+    if (config.test_type == "real") {
+      success = run_tests_on_container<FixedVector>(&config);
+    } else if (config.test_type == "fake") {
+      success = run_tests_on_container<NaiveFixedVector>(&config);
+    } else {
+      cerr << "unknown test type `" << config.test_type << "`" << endl;
     }
   }
+
+  cout << time_taken / 1000.0d << endl;
+  if (!success) return 1;
   return 0;
 }

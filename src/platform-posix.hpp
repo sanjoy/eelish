@@ -2,7 +2,9 @@
 #error "platform-posix.hpp can only be included from within platform.hpp"
 #endif
 
+#include <cassert>
 #include <pthread.h>
+#include <sys/time.h>
 
 namespace eelish {
 
@@ -28,6 +30,15 @@ class Mutex {
 
  private:
   pthread_mutex_t mutex_;
+};
+
+class Platform {
+ public:
+  static long CurrentTimeInUSec() {
+    struct timeval time;
+    gettimeofday(&time, NULL);
+    return time.tv_sec * 1000000 + time.tv_usec;
+  }
 };
 
 }
