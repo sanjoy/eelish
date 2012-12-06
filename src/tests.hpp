@@ -46,21 +46,6 @@ class ThreadedTest {
   void destroy_platform();
 };
 
-}
-
-/// Checks if two integral expressions are satisfy a binary condition.
-/// `lhs` and `rhs` must be pure.
-#define check_i(lhs, op, rhs, fail_action) do {                         \
-    if (!((lhs) op (rhs))) {                                            \
-	 eelish::ThreadedTest::output("(%s: %d): expected " #lhs " "	\
-				    #op " " #rhs " but "		\
-             #lhs " = %d, " #rhs " = %d\n", __FILE__, __LINE__, lhs,    \
-             rhs);                                                      \
-      fail_action;                                                      \
-    }                                                                   \
-  } while(0)
-
-
 class CommandLine {
  public:
   enum ArgType {
@@ -99,5 +84,25 @@ class Timer {
   long *out_time_;
   long begin_time_;
 };
+
+
+#define unlikely(condition) __builtin_expect((condition), 0)
+#define likely(condition) __builtin_expect((condition), 0)
+
+/// Checks if two integral expressions are satisfy a binary condition.
+/// `lhs` and `rhs` must be pure.  We reuse tests as benchmarks and
+/// we'd like to have such checks impact the actual performance as
+/// little as possible; hence the __builtin_expect.
+#define check_i(lhs, op, rhs, fail_action) do {                         \
+    if (unlikely(!((lhs) op (rhs)))) {                                  \
+	 eelish::ThreadedTest::output("(%s: %d): expected " #lhs " "	\
+				    #op " " #rhs " but "		\
+             #lhs " = %d, " #rhs " = %d\n", __FILE__, __LINE__, lhs,    \
+             rhs);                                                      \
+      fail_action;                                                      \
+    }                                                                   \
+  } while(0)
+
+}
 
 #endif
