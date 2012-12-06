@@ -25,6 +25,10 @@ class Atomic {
 
   inline void flush();
 
+  inline volatile T *raw_location() {
+    return reinterpret_cast<volatile T *>(&value_);
+  }
+
   /// A "primed" word is a word with its least significant bit set.
   /// Whether such an operation is meaningful or not is determined by
   /// the context in which it is used.
@@ -79,13 +83,9 @@ bool Atomic<T>::cas_prime(T *out_value) {
   if (old_value & kPrimeBit) return false;
 
   Word new_value = old_value | kPrimeBit;
-  if (boolean_cas(reinterpret_cast<T>(old_value),
-                  reinterpret_cast<T>(new_value))) {
-    *out_value = reinterpret_cast<T>(old_value);
-    return true;
-  } else {
-    return false;
-  }
+  *out_value = value_cas(reinterpret_cast<T>(old_value),
+                         reinterpret_cast<T>(new_value));
+  return *out_value == reinterpret_cast<T>(old_value);
 }
 
 template<typename T>

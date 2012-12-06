@@ -13,7 +13,9 @@ common-headers=$(addprefix src/, atomics.hpp			\
                                  platform.hpp			\
                                  platform-linux.hpp		\
                                  platform-posix.hpp		\
-                                 tests.hpp)
+                                 tests.hpp                      \
+                                 utils.hpp                      \
+                                 )
 fixed-vector-headers=$(addprefix src/, fixed-vector.hpp fixed-vector-inl.hpp)
 common-objects=$(addprefix ${BUILD_DIR}/, tests.o tests-pthread.o)
 

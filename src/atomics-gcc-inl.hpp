@@ -15,7 +15,8 @@ template<typename T>
 T Atomic<T>::value_cas(T old_value, T new_value) {
   Word old_word = reinterpret_cast<Word>(old_value);
   Word new_word = reinterpret_cast<Word>(new_value);
-  return __sync_val_compare_and_swap(&value_, old_word, new_word);
+  Word result = __sync_val_compare_and_swap(&value_, old_word, new_word);
+  return reinterpret_cast<T>(result);
 }
 
 template<typename T>

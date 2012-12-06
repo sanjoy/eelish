@@ -4,6 +4,8 @@
 
 #include <cassert>
 
+#include "utils.hpp"
+
 namespace eelish {
 
 // TODO: *IMPORTANT* comment discussing the rationale why FixedVector

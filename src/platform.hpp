@@ -1,16 +1,19 @@
 #ifndef __EELISH_PLATFORM__HPP
 #define __EELISH_PLATFORM__HPP
 
-#define unlikely(condition) __builtin_expect((condition), 0)
-#define likely(condition) __builtin_expect((condition), 0)
+#include "atomics.hpp"
 
 namespace eelish {
 
 class Platform {
  public:
   static inline long CurrentTimeInUSec();
-  static void inline WaitOnMemory(int *location, int current_value);
-  static void inline WakeWaiters(int *location, int count_waiters);
+
+  template<typename T>
+  static void inline WaitOnMemory(Atomic<T> location, T current_value);
+
+  template<typename T>
+  static void inline WakeWaiters(Atomic<T> location, int num_waiters);
 };
 
 };
