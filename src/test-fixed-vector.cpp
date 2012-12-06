@@ -26,7 +26,7 @@ int to_integer(long *pointer) {
   return static_cast<int>(integral_value >> 2);
 }
 
-const int kVectorSize = 128 * 1024;
+const int kVectorSize = 4 * 1024 * 1024;
 const int kSampleValue = 4242;
 
 // We will compare the performance of FixedVector with a naive locked
