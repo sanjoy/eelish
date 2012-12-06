@@ -9,7 +9,9 @@ BUILD_DIR=build
 common-headers=$(addprefix src/, atomics.hpp			\
                                  atomics-gcc-inl.hpp		\
                                  atomics-gcc-x86-inl.hpp	\
+                                 locks.hpp			\
                                  platform.hpp			\
+                                 platform-linux.hpp		\
                                  platform-posix.hpp		\
                                  tests.hpp)
 fixed-vector-headers=$(addprefix src/, fixed-vector.hpp fixed-vector-inl.hpp)

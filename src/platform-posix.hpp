@@ -32,13 +32,12 @@ class Mutex {
   pthread_mutex_t mutex_;
 };
 
-class Platform {
- public:
-  static long CurrentTimeInUSec() {
-    struct timeval time;
-    gettimeofday(&time, NULL);
-    return time.tv_sec * 1000000 + time.tv_usec;
-  }
-};
+long Platform::CurrentTimeInUSec() {
+  struct timeval time;
+  gettimeofday(&time, NULL);
+  return time.tv_sec * 1000000 + time.tv_usec;
+}
 
 }
+
+#include "platform-linux.hpp"

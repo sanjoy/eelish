@@ -6,7 +6,7 @@
 #include <iostream>
 #include <map>
 
-#include "platform.hpp"
+#include "locks.hpp"
 
 using namespace eelish;
 using namespace std;

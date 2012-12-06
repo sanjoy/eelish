@@ -1,23 +1,20 @@
 #ifndef __EELISH_PLATFORM__HPP
 #define __EELISH_PLATFORM__HPP
 
-// TODO: Check for POSIX here
-#include "platform-posix.hpp"
+#define unlikely(condition) __builtin_expect((condition), 0)
+#define likely(condition) __builtin_expect((condition), 0)
 
 namespace eelish {
 
-class MutexLocker {
+class Platform {
  public:
-  explicit inline MutexLocker(Mutex *mutex) : mutex_(mutex) {
-    mutex_->lock();
-  }
-
-  inline ~MutexLocker() { mutex_->unlock(); }
-
- private:
-  Mutex *mutex_;
+  static inline long CurrentTimeInUSec();
+  static void inline WaitOnMemory(int *location, int current_value);
+  static void inline WakeWaiters(int *location, int count_waiters);
 };
 
 };
+
+#include "platform-posix.hpp"
 
 #endif

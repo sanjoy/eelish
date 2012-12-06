@@ -86,9 +86,6 @@ class Timer {
 };
 
 
-#define unlikely(condition) __builtin_expect((condition), 0)
-#define likely(condition) __builtin_expect((condition), 0)
-
 /// Checks if two integral expressions are satisfy a binary condition.
 /// `lhs` and `rhs` must be pure.  We reuse tests as benchmarks and
 /// we'd like to have such checks impact the actual performance as
