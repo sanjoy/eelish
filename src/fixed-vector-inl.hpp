@@ -49,6 +49,7 @@ std::size_t FixedVector<T, Size>::push_back(T *value) {
 
 template<typename T, std::size_t Size>
 T *FixedVector<T, Size>::pop_back(std::size_t *out_index) {
+  int kRetryDelay = 1;
   while (true) {
     Word length = length_.nobarrier_load();
     if (length == 0) return reinterpret_cast<T *>(kOutOfRange);
@@ -58,15 +59,18 @@ T *FixedVector<T, Size>::pop_back(std::size_t *out_index) {
 
     // pop_back "primes" the value it is about to pop by setting a
     // bit.  It is illegal to pop "past" a primed element.
-    if (!buffer_[index].cas_prime(&value)) continue;
+    if (unlikely(!buffer_[index].cas_prime(&value))) {
+      Platform::Sleep(kRetryDelay);
+      continue;
+    }
 
     // We can't let this load be reordered to after the modifying the
     // length -- we might end up reading a completely different value.
     memory_fence();
 
-    // Something's changed.  Undo your doings and try again.
-    if (!length_.boolean_cas(length, length - 1)) {
-      // If other pop_backs have respected the prime bit, this cannot
+    if (unlikely(!length_.boolean_cas(length, length - 1))) {
+      // Something's changed.  Undo your doings and try again.  If
+      // other pop_backs have respected the prime bit, this cannot
       // have been unprimed.
       bool result = buffer_[index].cas_unprime();
       assert(result);

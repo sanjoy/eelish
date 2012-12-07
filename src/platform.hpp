@@ -8,6 +8,7 @@ namespace eelish {
 class Platform {
  public:
   static inline long CurrentTimeInUSec();
+  static inline void Sleep(int usecs);
 
   template<typename T>
   static void inline WaitOnMemory(Atomic<T> location, T current_value);

@@ -5,6 +5,7 @@
 #include <cassert>
 #include <pthread.h>
 #include <sys/time.h>
+#include <unistd.h>
 
 namespace eelish {
 
@@ -36,6 +37,10 @@ long Platform::CurrentTimeInUSec() {
   struct timeval time;
   gettimeofday(&time, NULL);
   return time.tv_sec * 1000000 + time.tv_usec;
+}
+
+void Platform::Sleep(int usecs) {
+  usleep(usecs);
 }
 
 }
