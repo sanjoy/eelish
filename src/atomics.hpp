@@ -39,7 +39,6 @@ class Atomic {
   /// isn't primed.  cas_prime also returns the unprimed value of the
   /// word via `out_previous_value`.
   inline bool cas_prime(T *out_previous_value);
-  inline bool cas_unprime();
 
   /// Convenience functions which return an unprimed value of type T.
   /// Helps avoid ugly casts in some cases.
@@ -86,17 +85,6 @@ bool Atomic<T>::cas_prime(T *out_value) {
   *out_value = value_cas(reinterpret_cast<T>(old_value),
                          reinterpret_cast<T>(new_value));
   return *out_value == reinterpret_cast<T>(old_value);
-}
-
-template<typename T>
-bool Atomic<T>::cas_unprime() {
-  Word old_value_raw = reinterpret_cast<Word>(nobarrier_load());
-  if (!(old_value_raw & kPrimeBit)) return false;
-
-  Word old_value = old_value_raw | kPrimeBit;
-  Word new_value = old_value & (~kPrimeBit);
-  return boolean_cas(reinterpret_cast<T>(old_value),
-                     reinterpret_cast<T>(new_value));
 }
 
 }

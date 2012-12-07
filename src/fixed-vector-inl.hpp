@@ -69,12 +69,8 @@ T *FixedVector<T, Size>::pop_back(std::size_t *out_index) {
     memory_fence();
 
     if (unlikely(!length_.boolean_cas(length, length - 1))) {
-      // Something's changed.  Undo your doings and try again.  If
-      // other pop_backs have respected the prime bit, this cannot
-      // have been unprimed.
-      bool result = buffer_[index].cas_unprime();
-      assert(result);
-      (void) result;
+      // Something's changed, undo priming and retry.
+      buffer_[index].nobarrier_store(value);
       continue;
     }
 
